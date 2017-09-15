@@ -258,6 +258,15 @@ CD      -- POROUSを解釈(LEVEL>=2) --处理孔隙率POROUS部分
             ENDIF
           ENDIF
 
+C在此读入SPH相关命令
+        ELSEIF(TEXT(IS(1):IE(1)).EQ.'SPH') THEN
+C         在这里处理SPH相关命令
+          IF(LEVEL.EQ.1) THEN
+            IF(NWD.LT.6) CALL VF_A2ERR('VF_II1INP','SYNTAX ERROR IN SPH 
+     &                                               COMMAND')    ! 需保证至少有六个单词
+            CALL VF_IISPH(IS,IE,NWD,TEXT)! 在这里调用VF_IISPH()处理具体的命令         
+          ENDIF
+
 CD      -- B.C.を解釈(LEVEL>=2) --
         ELSEIF (TEXT(IS(1):IE(1)).EQ.'B.C.') THEN
           IF (LEVEL.GE.2) THEN ! LEVEL=2时才执行
