@@ -928,7 +928,6 @@ C@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 CD    -- タイマーの切替 --
       CALL VF_A2CPUT(0,ICPUEN,KCP1PR) ! 准备工作已经完成，下边
       CALL VF_A2CPUT(0,ICPUST,KCP1CL) ! 开始具体的计算部分
-
 CD    -- SMAC法およびVOF法の計算ループ --
       IF (MGRANK.EQ.0) WRITE(*,9520) 'CALCULATION.'
       WRITE(ILPFIL,9520) 'CALCULATION.'

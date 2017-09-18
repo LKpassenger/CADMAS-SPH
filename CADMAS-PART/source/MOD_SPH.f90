@@ -17,12 +17,4 @@
 !!!!!!   CNUMBRE 用于纪录各个进程中包含的位于buffer region ...
 !!!!!!   CNUMGRE 和 CNUMBRE 可以在各个进程中累加，检查数目是否正确
 
-
-
-
-
-
-
-
-
       END MODULE 

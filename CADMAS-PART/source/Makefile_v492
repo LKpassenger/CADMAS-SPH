@@ -3,7 +3,7 @@
 ##################
 
 # ターゲット
-EXE	= a.3d-mg10-opt
+EXE	= ../EXECS/a.3d-mg10-opt
 #EXE	= a.3d-mg10-dbg
 
 # コンパイラおよびコンパイルオプション等の指定
@@ -97,15 +97,16 @@ SRCS	=db_ini.f db_trn.f \
          vf_zxmp_crank.f  vf_zxmp_csize.f  vf_zxmp_irecvd.f vf_zxmp_irecvi.f \
          vf_zxmp_isendd.f vf_zxmp_isendi.f vf_zxmp_wait.f \
          vf_zxmp_barri.f  vf_zxmp_gatheri.f vf_zxmp_gathervi.f \
-         vf_zxmp_gathervd.f vf_zxmp_scattervd.f
+         vf_zxmp_gathervd.f vf_zxmp_scattervd.f \
+         VF_IISPH.f
 
-OBJS   = $(SRCS:.f=.o) $(DUMMY)
+OBJS   = $(SRCS:.f =.o) $(DUMMY)
 
-SRCSM = mod_comm.f90 mod_fault.f mod_apara.f
-OBJSM  = mod_comm.o mod_fault.o mod_apara.o
-MDLSM  = mod_comm.mod mod_fault.mod mod_apara.mod
+SRCSM = mod_comm.f90 mod_fault.f mod_apara.f MOD_SPH.f90
+OBJSM  = mod_comm.o mod_fault.o mod_apara.o MOD_SPH.o
+MDLSM  = mod_comm.mod mod_fault.mod mod_apara.mod MOD_SPH.mod
 
-# コマンド
+# コマンド command
 $(EXE): $(OBJSM) $(OBJS)
 	$(FC) -o $@ $(OBJSM) $(OBJS) $(LIBRARY)
 
@@ -120,7 +121,9 @@ $(EXE): $(OBJSM) $(OBJS)
 	@:
 
 clean:
-	rm -f $(EXE) $(OBJS) $(OBJSM) $(MDLSM) core
+	rm -rf *.o *.mod
+#	rm -f $(EXE) $(OBJS) $(OBJSM) $(MDLSM) core
+   
 
 ###
 vf_a1main.o: mod_comm.mod VF_A0PRM.h VF_ACOMPI.h VF_ACOMPR.h VF_ACPUTR.h \
