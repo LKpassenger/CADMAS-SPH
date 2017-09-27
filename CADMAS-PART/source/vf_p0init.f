@@ -28,6 +28,7 @@ C     -- VF_APARAI.hを初期化する -- 初始化 VF_APARAI.h中的变量为0
       CALL VF_ZSETI1(MGNPIN,0,MAXPRO)
       CALL VF_ZSETI1(MGPARE,0,MAXPRO)
       CALL VF_ZSETI1(MGAREA,0,MAXPRO)
+      CALL VF_ZSETI1(MGSPH,0,MAXPRO) ! add by LK
       MGPRNK=0
       CALL VF_ZSETI1(MGPINF,0,9)
       MGCNUM=0
@@ -65,7 +66,7 @@ C     -- VF_APARAR.hを初期化する -- 初始化 VF_APARAR.h中的变量为0.
       GLYMAX=0.0D0
 
 C     -- 初期化する --
-      CALL VF_ZXMG_INIT(IERR) 
+      CALL VF_ZXMG_INIT(IERR)
 
 C     -- プロセス数を得る --
       CALL VF_ZXMG_CSIZE(MGPROC,IERR)  ! Get number of processe,设定至VF_APARAI.h中的MGPROC

@@ -441,7 +441,7 @@ CDEBUG      write(100+myrank,*) 'jposwall=',jposwall
 CDEBUG      call vf_zxmp_barri(ierr)
 c
       RETURN
-      END
+      END SUBROUTINE
 C
 C
       SUBROUTINE DELETE_GGV_LIST(MYRANK,NPROCS)
@@ -476,7 +476,7 @@ c      write(100+myrank,*) 'start:delete_ggv_list'
 C
 c      write(100+myrank,*) 'end:delete_ggv_list'
       RETURN
-      END
+      END SUBROUTINE
 C
 C
       SUBROUTINE SET_GGV_F(GWRK,NGWRK,GGV,NF,NUMI,NUMJ,NUMK,
@@ -532,7 +532,7 @@ C
       DEALLOCATE(GWRK2,GWRKLOCAL) ! 注意清空内存
 C
       RETURN
-      END
+      END SUBROUTINE
 C
 C
       SUBROUTINE SET_GGV_UVW(GWRK,NGWRK,GGXYZ,NUMI,NUMJ,NUMK,   ! 用于GGX,GGY,GGZ
@@ -611,7 +611,7 @@ C
       DEALLOCATE(GWRK2,GWRKLOCAL)
 C
       RETURN
-      END
+      END SUBROUTINE
 C
 C
       SUBROUTINE MAKE_P2C_LIST(MGCPOS,MGCINF,MGCNUM,MYRANK,NPROCS,
@@ -815,7 +815,7 @@ c      write(100+myrank,*) 'ncounts=',ncounts
 c      write(100+myrank,*) 'ncountssum=',ncountssum
 C
       RETURN
-      END
+      END SUBROUTINE
 C
 C
       SUBROUTINE DELETE_P2C_LIST(MYRANK,NPROCS)
@@ -834,7 +834,7 @@ C
       DEALLOCATE(JPOSSALL,STAT=IERR)
 C
       RETURN
-      END
+      END SUBROUTINE
 C
 C
       SUBROUTINE SET_P2C(GWRK,GWRKLOCAL,MYRANK,NPROCS)
@@ -860,7 +860,7 @@ C
       ENDIF
 C
       RETURN
-      END
+      END SUBROUTINE
 C
 C
 
@@ -1069,7 +1069,7 @@ C
      $         STAT=IERR)
 C
       RETURN
-      END
+      END SUBROUTINE
 C
 C
       SUBROUTINE DELETE_C2P_LIST(MYRANK,NPROCS)
@@ -1088,7 +1088,7 @@ C
       DEALLOCATE(JPOSRALL,STAT=IERR)
 C
       RETURN
-      END
+      END SUBROUTINE
 C
 C
       SUBROUTINE SET_C2P(GWRK,GWRKLOCAL,MYRANK,NPROCS)
@@ -1114,7 +1114,7 @@ C
      $                       NPROCS,GWRKLOCAL,NCOUNTR,IERR)
 C
       RETURN
-      END
+      END SUBROUTINE
 C
 C
       END MODULE MOD_APARA

@@ -3,7 +3,7 @@
 ##################
 
 # ターゲット
-EXE	= ../EXECS/a.3d-mg10-opt
+EXE	= ../EXECS/cadmas.o
 #EXE	= a.3d-mg10-dbg
 
 # コンパイラおよびコンパイルオプション等の指定
@@ -98,7 +98,7 @@ SRCS	=db_ini.f db_trn.f \
          vf_zxmp_isendd.f vf_zxmp_isendi.f vf_zxmp_wait.f \
          vf_zxmp_barri.f  vf_zxmp_gatheri.f vf_zxmp_gathervi.f \
          vf_zxmp_gathervd.f vf_zxmp_scattervd.f \
-         VF_IISPH.f
+         VF_IISPH.f  VF_SPH_INITMPI.f  VF_SPH_INITVAR.f
 
 OBJS   = $(SRCS:.f =.o) $(DUMMY)
 

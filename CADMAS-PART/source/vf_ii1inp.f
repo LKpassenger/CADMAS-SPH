@@ -20,7 +20,6 @@ CD      (6)文法上有効な最後の単語以降は無視
 CD      (7)ダブ等の特殊文字は判定していない(注意)
 
 C==== 宣言 ===========================================================
-
 C     -- 大域型 --
       IMPLICIT INTEGER(I-N),DOUBLE PRECISION(A-H,O-Z)
 
@@ -258,7 +257,7 @@ CD      -- POROUSを解釈(LEVEL>=2) --处理孔隙率POROUS部分
             ENDIF
           ENDIF
 
-C在此读入SPH相关命令
+C在此读入SPH相关命令 add by LK
         ELSEIF(TEXT(IS(1):IE(1)).EQ.'SPH') THEN
 C         在这里处理SPH相关命令
           IF(LEVEL.EQ.1) THEN

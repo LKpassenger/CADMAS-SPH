@@ -1,8 +1,11 @@
       SUBROUTINE VF_IISPH(IS,IE,NWD,TEXT)
+C     子程序用来读入.IN文件中SPH 命令部分，目前可以指定GHOST & BUFFER 功能区的范围,
+C     并判断当前进程负责的范围是否和这两个功能区有交集
       USE mod_sph, ONLY: GREIS,GREIE,GREJS,GREJE,GREKS,GREKE,
      &                    BREIS,BREIE,BREJS,BREJE,BREKS,BREKE,
      &                    BRE,GRE,
-     &                    CNUMGRE,CNUMBRE
+     &                    CNUMGRE,CNUMBRE,
+     &                    NB_SPH
       IMPLICIT INTEGER(I-N), DOUBLE PRECISION(A-H,O-Z)
 
       INCLUDE 'VF_A0PRM.h'
@@ -19,6 +22,9 @@
       
 
 !=====实现==========================================================================
+      IF( NB_SPH.EQ.0 ) CALL VF_A2ERR('VF_IISPH','SHOULD NOT SET
+     &                            SPH COMMAND FOR THIS DIMAIN')   !!!对于不参与coupling的区域，不应给定SPH命令
+C========先初始化====
       IF (TEXT(IS(2):IE(2)).EQ.'REGION') THEN
         IF (TEXT(IS(3):IE(3)).EQ.'GHOST') THEN
           !!记录给定的GHOST REGION区域的范围
@@ -56,7 +62,18 @@
       ELSE
         CALL VF_A2ERR('VF_IISPH','SYNTAX ERROR IN SPH COMMAND,
      &                ONLY "REGION" IS AVAILABLE BY NOW')
-      ENDIF 
+      ENDIF
+!!!!!!----判断设定的值是否合理
+      IF( GREIS.LE.1.OR.GREIS.GE.NUMI0.OR.GREIE.LE.1.OR.GREIE.GE.NUMI0
+     & .OR.GREJS.LE.1.OR.GREJS.GE.NUMJ0.OR.GREJE.LE.1.OR.GREJE.GE.NUMJ0
+     & .OR.GREKS.LE.1.OR.GREKS.GE.NUMK.OR.GREKE.LE.1.OR.GREKE.GE.NUMK )
+     &    CALL VF_A2ERR('VF_IISPH','THE LIMIT OF GHOST REGION 
+     &                   IS UNREASONABLE')
+      IF( BREIS.LE.1.OR.BREIS.GE.NUMI0.OR.BREIE.LE.1.OR.BREIE.GE.NUMI0
+     & .OR.BREJS.LE.1.OR.BREJS.GE.NUMJ0.OR.BREJE.LE.1.OR.BREJE.GE.NUMJ0
+     & .OR.BREKS.LE.1.OR.BREKS.GE.NUMK.OR.BREKE.LE.1.OR.BREKE.GE.NUMK )
+     &    CALL VF_A2ERR('VF_IISPH','THE LIMIT OF BUFFER REGION 
+     &                   IS UNREASONABLE')
 
 !!!!!!----判断当前进程负责的范围是否包含ghost region 以及 buffer region
       IF (TEXT(IS(3):IE(3)).EQ.'GHOST') THEN

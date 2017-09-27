@@ -1,4 +1,5 @@
       SUBROUTINE VF_PMGINP()
+      USE mod_sph, ONLY: NB_SPH
 
 CD=== 概要 ===========================================================
 
@@ -17,6 +18,8 @@ C     -- 大域変数 --
       INCLUDE 'VF_APARAI.h'
       INCLUDE 'VF_ASTOCI.h'
 
+      CHARACTER(10) text  ! 用于临时读入.env命令行中的'SPH' & 'NOSPH'
+
 C==== 実行 ===========================================================
 
 CD    -- マルチグリッド環境ファイルの読み込み --
@@ -32,7 +35,9 @@ CD    -- マルチグリッド環境ファイルの読み込み --
         IF (MGARAN.LE.0     ) GOTO 9040
         N=0
         DO 120 I=1,MGARAN
-          READ(IENFIL,*,END=9020,ERR=9020) MGNAME(I),MGNPIN(I),MGPARE(I) !依次读入每个分区的名称、分配给该区的进程数、父分区的编号
+          text=' '
+          READ(IENFIL,*,END=9020,ERR=9020) MGNAME(I),MGNPIN(I),MGPARE(I)
+     &          ,text    !依次读入每个分区的名称、分配给该区的进程数、父分区的编号
           MGNLEN(I)=0
           DO 100 L=MAXCHR,1,-1  ! 
             IF (MGNAME(I)(L:L).NE.' ') THEN
@@ -41,6 +46,28 @@ CD    -- マルチグリッド環境ファイルの読み込み --
             ENDIF
  100      CONTINUE
  110      CONTINUE
+          ! 去掉text中多余的空格再判断MGSPH()   add by LK
+          DO L=1,LEN(text)
+            IF( text(L:L).NE.' ' ) THEN
+              is=L
+              EXIT
+            ENDIF
+          ENDDO
+          DO L=LEN(text),1,-1
+            IF( text(L:L).NE.' ' ) THEN
+              ie=L
+              EXIT
+            ENDIF
+          ENDDO
+
+          IF( text(is:ie).EQ.'SPH' ) THEN
+            MGSPH(I)=1
+          ELSEIF( text(is:ie).EQ.'NOSPH' ) THEN
+            MGSPH(I)=0
+          ELSE
+            CALL VF_A2ERR('VF_PMGINP','UNKNOWN WORD')
+          ENDIF
+
           IF (MGNLEN(I).LE.0     ) GOTO 9040   !检查是否有不适当的名称存在
           IF (MGNPIN(I).LE.0     ) GOTO 9040   !...是否有不适当的进程数
 CCC IC-MG COUPLING    IF (MGPARE(I).LT.0    ) GOTO 9040
@@ -62,6 +89,7 @@ CD    -- 環境データのパッシング --Passing environmental data由于前
       CALL VF_P0BCSI(MGNLEN,MGARAN,0)
       CALL VF_P0BCSI(MGNPIN,MGARAN,0)
       CALL VF_P0BCSI(MGPARE,MGARAN,0)
+      CALL VF_P0BCSI(MGSPH,MGARAN,0) ! 将MGSPH()广播至其他进程 add by LK
       DO 200 I=1,MGARAN
         CALL VF_P0BCSC(MGNAME(I),MGNLEN(I),0)
  200  CONTINUE
@@ -73,7 +101,7 @@ cmod 20131023        IF (N.LT.0) NB_SC = -N
 cmod 20160527        IF (N.LT.0.AND.N.GT.-10) NB_SC = -N
         IF (N.GT.0) THEN
           DO 300 L=1,MGARAN-1
-            N=MGPARE(N)
+            N=MGPARE(N) ! 相当于一级一级的向上找，直至找到最上一层的父级
             IF (N.LE.0) GOTO 310
  300      CONTINUE
  310      CONTINUE
@@ -99,6 +127,7 @@ CD    -- 領域毎のデータをプロセス毎に展開する --
           MGNLEN(N)=MGNLEN(I)
           MGNPIN(N)=MGNPIN(I) 
           MGPARE(N)=MGPARE(I) !父分区的编号
+          MGSPH(N)=MGSPH(I)  ! 为每个进程设定MGSPH()  add by LK
           IF (N.EQ.MGRANK+1) THEN
             NPROCS=MGNPIN(N)  !设定每一个进程的NPROCS与MYRANK
             MYRANK=NPROCS-L
@@ -124,6 +153,13 @@ c      enddo
 c      write(100+mgrank,*) ''
       IF(MGPARE(MGRANK+1).LT.0.AND.MGPARE(MGRANK+1).GT.-10)  ! 通过这里，将CADMAS中有些进程的NB_SC设置为非0
      $   NB_SC = -MGPARE(MGRANK+1)
+
+      NB_SPH=0 ! 判断每个CADMAS的每个进程是否参与和SPH的信息交换
+      IF( MGSPH(MGRANK+1).EQ.1 ) THEN
+        NB_SPH=1
+      ELSEIF( MGSPH(MGRANK+1).EQ.0 ) THEN
+        NB_SPH=0
+      ENDIF
 C
 CD    -- 領域毎のコミュニケータ作成 -- Create a communicator for each area
       MGCOMM=0

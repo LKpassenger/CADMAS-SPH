@@ -11,6 +11,7 @@ CD      (4)言語    :Fortran90(配列の動的アロケートのため)
 C==== 宣言 ===========================================================
 
       use mod_comm,only: init_mpmd,comm_mlicdsmg2fc
+      USE mod_sph, ONLY: DELETE_ARRAY_CWSPH
 C     -- 大域型 --
       IMPLICIT INTEGER(I-N),DOUBLE PRECISION(A-H,O-Z)
 
@@ -393,6 +394,11 @@ CD    -- コモン変数へのデフォルト値の設定 -- 对头文件中的�
 CD    -- STOCとの通信環境の初期化 -- Initialization of communication environment with STOC
       IERR = 0
       CALL VF_STOC_INIT(IERR)
+
+      CALL VF_SPH_INITVAR()    !!! 初始化
+      CALL VF_SPH_INITMPI(IERR)   !!! 调用VF_SPH_INITMPI()初始化CADMAS与SPH模型的MPI通讯环境  add by LK
+      IF( IERR.NE.0 ) CALL VF_A2ERR('VF_A1MAIN',
+     &                          'ERROR AFTER RUNNING VF_SPH_INITMPI()')
 
 C     ---针对与 SPH 模型的coupling，应在这里调用VF_SPH_INIT()初始化CADMAS与SPH的并行环境
 
@@ -1224,6 +1230,7 @@ CD    -- ファイルのクローズ -- Close the file
 
 CD    -- 並列環境の終了 --
       CALL VF_P0END()
+      CALL DELETE_ARRAY_CWSPH   !!! 释放Coupling SPH 用的数组 add by LK
 
 C     -- 実行文の終了 --
       GOTO 9999

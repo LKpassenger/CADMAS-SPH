@@ -24,22 +24,23 @@ module mod_comm
 ! 考虑CADMAS 与 SPH coupling 时，应为my_group,my_model 添加 代表SPH的变量值，这样才能分裂正确的通讯子comm_group,comm_model
 ! 除此之外，还应 分割 整合CADMAS和SPH进程的 通讯子，用以两个模型之间的信息交换
   integer,parameter:: &                            ! グループ番号の定義 define group number
-       &              l_stoc=0, l_cadmas=1
+       &              l_stoc=0, l_cadmas=1, l_sph=2  ! 添加了表示SPH模型的group类别-----LK
   integer,parameter:: &                            ! モデル番号の定義 define model number
        &              l_stoc_ml   = 0, l_stoc_ic   = 1, l_stoc_ds = 2 &
        &             ,l_stoc_dm   = 3, l_stoc_oil  = 4                &
        &             ,l_cadmas_mg =10, l_cadmas_2fc=11, l_paridem =12 &
-       &             ,l_mlt_agent =13, l_str       =14
-  character(6),parameter::  c_group(0:1)=(/ &      ! グループ名 define group name
-       &             'stoc  ', 'cadmas'   /)
-  character(10),parameter:: c_model(0:19)=(/ &     ! モデル名  define model name
+       &             ,l_mlt_agent =13, l_str       =14                &
+       &             ,l_sph_isph =20    ! 添加了表示ISPH模型的model类别-----LK
+  character(6),parameter::  c_group(0:2)=(/ &      ! グループ名 define group name add by LK
+       &             'stoc  ', 'cadmas','sph'   /)
+  character(10),parameter:: c_model(0:20)=(/ &     ! モデル名  define model name  add by LK
        &             'ml        ', 'ic        ', 'ds        ' &
        &            ,'dm        ', 'oil       ', '#5#       ' &
        &            ,'#6#       ', '#7#       ', '#8#       ' &
        &            ,'#9#       ', 'mg        ', '2fc       ' &
        &            ,'paridem   ', 'mlt_agent ', 'str       ' &
        &            ,'#15#      ', '#16#      ', '#17#      ' &
-       &            ,'#18#      ', '#19#      '               &
+       &            ,'#18#      ', '#19#      ', 'sph       ' &
        &                                   /)
 !
 ! Definition for each model
@@ -65,6 +66,7 @@ module mod_comm
   integer:: comm_2fc_str          ! CADMAS-SURF/2FCとSTRの通信に用いるコミュニケータ
   integer:: comm_mlicdsmg2fc_mlt  ! STOC-ML,IC,DSとCADMAS-SURF/MG,2FCとMLT_AGENTの通信に用いるコミュニケータ
   integer:: comm_mlicdsmg2fc      ! STOC-ML,IC,DSとCADMAS-SURF/MGと2FCの通信に用いるコミュニケータ Communicator used for communication between STOC-ML, IC, DS and CADMAS-SURF / MG and 2FC
+  INTEGER   comm_mg_isph          ! 负责CADMAS-SPH的进程集合，通过对comm_work_mg_isph分割得到 add by LK
 !
 ! テンポラリで設定するコミュニケータ(モデル間の通信に用いるコミュニケータを作成する前に、
 !                                    COMM_SPLITに参加するモデルを絞ったコミュニケータを作成しておく)
@@ -75,6 +77,7 @@ module mod_comm
   integer:: comm_work_2fc_dem      ! CADMAS-SURF/2FCとPARIDEMを含むコミュニケータ
   integer:: comm_work_2fc_str      ! CADMAS-SURF/2FCとSTRを含むコミュニケータ
   integer:: comm_work_mlicdsmg2fc_mlt ! STOC-ML,IC,DSとCADMAS-SURF/MG,2FCとMLT_AGENTを含むコミュニケータ
+  INTEGER comm_work_mg_isph        ! 包含CADMAS 以及 ISPH 进程在内的通讯子 add by LK
 !
   integer:: nsize_all,nrank_all    ! mpi_comm_worldにおけるサイズとランク  Size and rank at mpi_comm_world
   integer:: nsize_grp,nrank_grp    ! com_groupにおけるサイズとランク Size and rank in com_group
@@ -226,6 +229,16 @@ contains
     call mpi_comm_split(mpi_comm_world,imodel,nrank_all,comm_work_mlicdsmg2fc_mlt &    ! comm_work_mlicdsmg2fc_mltの作成 设定通讯子comm_work_mlicdsmg2fc_mlt
          &            ,ierr)
          if(ierr/=0) goto 911
+!
+    imodel=my_model
+    IF ( imodel==l_cadmas_mg.or.imodel==l_sph_isph ) THEN
+      imodel=0
+    ELSE
+      imodel=1
+    ENDIF
+    CALL mpi_comm_split(mpi_comm_world,imodel,nrank_all,comm_work_mg_isph,ierr)     ! 设定通讯子comm_work_mg_isph
+    IF(ierr/=0) GOTO 911
+
 !!!
 !!! (5) stocグループとcadmasグループの実行ディレクトリを分ける
 !!! Divide the execution directory of stoc group and cadmas group 
@@ -276,10 +289,10 @@ contains
        write(*,*) ''
 !
        if( nsize_all-nsize_grp>0 ) then
-       write(*,30) c_group(1-my_group),nsize_all-nsize_grp
+       write(*,30) c_group(2-my_group),nsize_all-nsize_grp   !!!add by LK
        m=0
        do n=0,nsize_all-1
-          if( l_group(n)==1-my_group ) then
+          if( l_group(n)==2-my_group ) then   !!!add by LK
              write(*,40) m, trim(c_model(l_model(n)))
              m=m+1
           endif

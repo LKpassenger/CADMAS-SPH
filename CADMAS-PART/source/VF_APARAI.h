@@ -3,7 +3,8 @@ C-*- mode:fortran; -*-
       COMMON /VF_APARAI/ MGPROC,MGRANK,MGCOMM,
      &                   MGARAN,
      &                   MGNAME(MAXPRO),MGNLEN(MAXPRO),
-     &                   MGNPIN(MAXPRO),MGPARE(MAXPRO),MGAREA(MAXPRO),
+     &                   MGNPIN(MAXPRO),MGPARE(MAXPRO),
+     &                   MGAREA(MAXPRO),MGSPH(MAXPRO),
      &                   MGPRNK,MGPINF(9),
      &                   MGCNUM,MGCRNK(MAXPRO),MGCINF(9,MAXPRO),
      &                   MGCPOS(6,MAXPRO),
@@ -33,6 +34,7 @@ CD    MGNLEN(MAXPRO)   : CNS : I*4 : 領域名の文字数 Number of characters 
 CD    MGNPIN(MAXPRO)   : CNS : I*4 : 領域毎のプロセス数  Number of processes per region
 CD    MGPARE(MAXPRO)   : CNS : I*4 : 親の領域番号 Parent Region number
 CD    MGAREA(MAXPRO)   : CNS : I*4 : 領域番号 Region number 每个进程所属的分区号 1 2 3 4 5 .....
+CD    MGSPH(MAXPRO)    : CNS : I*4 : 用以记录进程是否参与到与SPH模型coupling  0代表不参与  1代表参与  add by LK
 CD    MGPRNK           : CNS : I*4 : 全体の中の親のランク Parent's rank in the whole
 CD                                   < 0:親無し No parent
 CD                                   >=0:親のランク parent's rank
